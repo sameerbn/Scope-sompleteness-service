@@ -18,3 +18,18 @@ public interface CompletenessCheckJobRepository extends JpaRepository<Completene
 public interface RetryTrackerRepository extends JpaRepository<RetryTracker, Long> {
     List<RetryTracker> findByJobIdOrderByAttemptedAt(Long jobId);
 }
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface FileMetadataRepository extends JpaRepository<FileMetadata, Long> {
+
+    @Query(value = "SELECT new com.example.ScheduledGroupDto(f.targetDirectoryPath, MAX(f.lastModified), string_agg(f.filePath, ',')) " +
+                   "FROM FileMetadata f " +
+                   "WHERE f.status = 'NEW' " +
+                   "GROUP BY f.targetDirectoryPath")
+    List<ScheduledGroupDto> findNewFilesGroupedWithPaths();
+}
